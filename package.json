@@ -1,0 +1,25 @@
+{
+  "name": "comprehensive-demo-react18",
+  "private": true,
+  "workspaces": [
+    "./app-01",
+    "./app-02",
+    "./app-03",
+    "./app-05",
+    "sentry-module-federation"
+  ],
+  "version": "0.0.0",
+  "scripts": {
+    "start": "concurrently \"lerna run --scope=comprehensive-demo-react18_app* --parallel start\" \"yarn serve\"",
+    "build": "yarn build:sentry && lerna run --scope=comprehensive-demo-react18_app* build",
+    "build:sentry": "cd sentry-module-federation && yarn build",
+    "serve": "lerna run --scope=comprehensive-demo-react18_app* --parallel serve",
+    "clean": "lerna run --scope=comprehensive-demo-react18_app* --parallel clean"
+  },
+  "devDependencies": {
+    "concurrently": "7.6.0",
+    "lerna": "3.22.1",
+    "prettier": "^2.8.8",
+    "wait-on": "7.0.1"
+  }
+}

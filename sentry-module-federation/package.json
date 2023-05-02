@@ -1,0 +1,13 @@
+{
+  "name": "sentry-module-federation",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "typescript": "^5.0.4",
+    "@sentry/types": "^7.49.0"
+  }
+}
