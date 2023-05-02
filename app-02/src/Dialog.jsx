@@ -11,7 +11,7 @@ import React from "react";
 
 import { registerModule } from "sentry-module-federation";
 
-registerModule("app-02", document.currentScript.src);
+registerModule({ tags: { module: "app-02" } });
 
 function DialogComponent() {
   const [open, setOpen] = React.useState(false);

@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 import { registerModule } from "sentry-module-federation";
 
-registerModule("app-03", document.currentScript.src);
+registerModule({ tags: { module: "app-03" } });
 
 const Button = styled.button`
   display: inline-block;

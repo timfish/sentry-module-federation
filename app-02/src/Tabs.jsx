@@ -19,7 +19,7 @@ import React from "react";
 
 import { registerModule } from "sentry-module-federation";
 
-registerModule("app-02", document.currentScript.src);
+registerModule({ tags: { module: "app-02" } });
 
 const Button = React.lazy(() => import("app_03/Button"));
 

@@ -2,7 +2,7 @@ import { LitElement, html, customElement, property, css } from "lit-element";
 
 import { registerModule } from "sentry-module-federation";
 
-registerModule("app-05", (document.currentScript as any).src);
+registerModule({ tags: { module: "app-05" } });
 
 @customElement("action-button")
 export class ActionButton extends LitElement {

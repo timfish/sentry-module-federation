@@ -55,6 +55,9 @@ module.exports = {
       },
       shared: {
         ...deps,
+        "sentry-module-federation": {
+          singleton: true,
+        },
         "@material-ui/core": {
           singleton: true,
         },

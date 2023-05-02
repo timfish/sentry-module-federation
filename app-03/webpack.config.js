@@ -52,6 +52,9 @@ module.exports = {
         "./Button": "./src/Button",
       },
       shared: {
+        "sentry-module-federation": {
+          singleton: true,
+        },
         "react-dom": {
           singleton: true,
         },
