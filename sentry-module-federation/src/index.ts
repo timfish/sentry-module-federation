@@ -93,8 +93,6 @@ export class ModuleFederationIntegration implements Integration {
           event.exception?.values[0]
         );
 
-        console.log("moduleOptions", moduleOptions);
-
         if (moduleOptions) {
           event.tags = {
             ...event.tags,

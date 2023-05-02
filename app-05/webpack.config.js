@@ -47,11 +47,7 @@ module.exports = {
         "./AlertBox": "./src/components/alert-box.ts",
         "./components": "./src/index.ts",
       },
-      shared: {
-        "sentry-module-federation": {
-          singleton: true,
-        },
-      },
+      shared: {},
     }),
     new HtmlWebpackPlugin({
       title: "LitHTML Typescript Example",
