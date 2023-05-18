@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 import { registerModule } from "sentry-module-federation";
 
-registerModule({ tags: { module: "app-03" } });
+registerModule({ release: "app-03@1.0.0", tags: { dsn: "__DSN_3__" } });
 
 const Button = styled.button`
   display: inline-block;

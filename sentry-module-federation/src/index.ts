@@ -4,7 +4,15 @@ import {
   Hub,
   Integration,
   StackParser,
+  Transport,
+  BaseTransportOptions,
 } from "@sentry/types";
+import {
+  addGlobalEventProcessor,
+  makeMultiplexedTransport,
+  defaultStackParser,
+  makeFetchTransport,
+} from "@sentry/browser";
 
 declare global {
   interface Window {
@@ -75,36 +83,37 @@ function getTopModuleFromException(
   return undefined;
 }
 
-export class ModuleFederationIntegration implements Integration {
-  public static id: string = "ModuleFederationIntegration";
+function hookGlobalEventProcessor() {
+  addGlobalEventProcessor((event) => {
+    if (event.exception?.values[0]) {
+      const moduleOptions = getTopModuleFromException(
+        defaultStackParser,
+        event.exception?.values[0]
+      );
 
-  public name: string = ModuleFederationIntegration.id;
+      if (moduleOptions) {
+        event.tags = {
+          ...event.tags,
+          ...moduleOptions.tags,
+        };
 
-  public setupOnce(
-    addGlobalEventProcessor: (callback: EventProcessor) => void,
-    getCurrnetHub: () => Hub
-  ) {
-    const stackParser = getCurrnetHub().getClient()?.getOptions()?.stackParser;
-
-    addGlobalEventProcessor((event) => {
-      if (event.exception?.values[0]) {
-        const moduleOptions = getTopModuleFromException(
-          stackParser,
-          event.exception?.values[0]
-        );
-
-        if (moduleOptions) {
-          event.tags = {
-            ...event.tags,
-            ...moduleOptions.tags,
-          };
-
-          event.release = moduleOptions.release || event.release;
-        }
+        event.release = moduleOptions.release || event.release;
       }
+    }
 
-      console.log(event);
-      return event;
-    });
-  }
+    return event;
+  });
+}
+
+export function getModuleFederationTransport(): (
+  options: BaseTransportOptions
+) => Transport {
+  hookGlobalEventProcessor();
+
+  return makeMultiplexedTransport(makeFetchTransport, ({ getEvent }) => {
+    const event = getEvent();
+    return event?.tags?.dsn && typeof event.tags.dsn === "string"
+      ? [event.tags.dsn]
+      : [];
+  });
 }
