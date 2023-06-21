@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin =
   require("webpack").container.ModuleFederationPlugin;
+const { SentryModuleDataPlugin } = require("sentry-module-federation/plugin");
 
 module.exports = {
   entry: "./src/index",
@@ -59,6 +60,9 @@ module.exports = {
           singleton: true,
         },
       },
+    }),
+    new SentryModuleDataPlugin({
+      team: "team-button",
     }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",

@@ -17,10 +17,6 @@ import {
 
 import React from "react";
 
-import { registerModule } from "sentry-module-federation";
-
-registerModule({ tags: { module: "app-02" } });
-
 const Button = React.lazy(() => import("app_03/Button"));
 
 const useStyles = makeStyles((theme) => ({

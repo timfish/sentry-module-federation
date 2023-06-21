@@ -1,9 +1,5 @@
 import { LitElement, html, customElement, property, css } from "lit-element";
 
-import { registerModule } from "sentry-module-federation";
-
-registerModule({ release: "app-05@1.0.0", tags: { dsn: "__DSN_5__" } });
-
 @customElement("action-button")
 export class ActionButton extends LitElement {
   @property({ type: String }) foo: string;

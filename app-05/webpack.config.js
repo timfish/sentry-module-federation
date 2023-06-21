@@ -1,11 +1,9 @@
 const path = require("path");
-const dist = path.resolve(__dirname, "dist");
 const ModuleFederationPlugin =
   require("webpack").container.ModuleFederationPlugin;
-
 const mode = process.env.NODE_ENV || "development";
-const prod = mode === "production";
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { SentryModuleDataPlugin } = require("sentry-module-federation/plugin");
 
 module.exports = {
   entry: "./src/index.ts",
@@ -48,6 +46,9 @@ module.exports = {
         "./components": "./src/index.ts",
       },
       shared: {},
+    }),
+    new SentryModuleDataPlugin({
+      team: "team-components",
     }),
     new HtmlWebpackPlugin({
       title: "LitHTML Typescript Example",

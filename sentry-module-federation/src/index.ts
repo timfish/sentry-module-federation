@@ -1,39 +1,15 @@
-import {
-  EventProcessor,
-  Exception,
-  Hub,
-  Integration,
-  StackParser,
-  Transport,
-  BaseTransportOptions,
-} from "@sentry/types";
-import {
-  addGlobalEventProcessor,
-  makeMultiplexedTransport,
-  defaultStackParser,
-  makeFetchTransport,
-} from "@sentry/browser";
+import { Event, StackParser, StackFrame } from "@sentry/types";
+import { defaultStackParser } from "@sentry/browser";
 
 declare global {
   interface Window {
-    __SMF_STACK_TRACES__?: Record<string, ModuleOptions | false>;
-    __SMF_MODULES__?: Record<string, ModuleOptions>;
+    __SMF_STACK_TRACES__?: Record<string, any | false>;
+    __SMF_MODULES__?: Record<string, any>;
   }
 }
 
-interface ModuleOptions {
-  tags?: Record<string, string>;
-  release?: string;
-}
-
-export function registerModule(options: ModuleOptions) {
-  const stack = new Error().stack;
-
-  if (!window.__SMF_STACK_TRACES__) {
-    window.__SMF_STACK_TRACES__ = {};
-  }
-
-  window.__SMF_STACK_TRACES__[stack] = options;
+export interface StackFrameWithModuleData extends StackFrame {
+  moduleData?: any;
 }
 
 function ensureStacksAreParsed(parser: StackParser): void {
@@ -43,7 +19,7 @@ function ensureStacksAreParsed(parser: StackParser): void {
       continue;
     }
 
-    const options = window.__SMF_STACK_TRACES__[key] as ModuleOptions;
+    const data = window.__SMF_STACK_TRACES__[key];
 
     // Ensure this stack doesn't get parsed again
     window.__SMF_STACK_TRACES__[key] = false;
@@ -51,69 +27,32 @@ function ensureStacksAreParsed(parser: StackParser): void {
     const frames = parser(key);
 
     for (const frame of frames.reverse()) {
-      // ignore the top of the stack
-      if (frame.function.endsWith("registerModule")) {
-        continue;
-      }
-
       if (frame.filename) {
         window.__SMF_MODULES__ = window.__SMF_MODULES__ || {};
-        window.__SMF_MODULES__[frame.filename] = options;
+        window.__SMF_MODULES__[frame.filename] = data;
         break;
       }
     }
   }
 }
 
-function getTopModuleFromException(
-  parser: StackParser,
-  exception: Exception
-): ModuleOptions | undefined {
-  ensureStacksAreParsed(parser);
-
-  // Sentry frames have the top of the stack at the end of the array
-  const reverseFrames = exception.stacktrace?.frames.reverse();
-  for (const frame of reverseFrames) {
-    const mod = window.__SMF_MODULES__[frame.filename];
-    if (mod) {
-      return mod;
-    }
+export function getFramesWithModuleData(
+  event: Event
+): StackFrameWithModuleData[] | undefined {
+  if (!event.exception.values?.[0].stacktrace?.frames) {
+    return undefined;
   }
 
-  return undefined;
-}
+  ensureStacksAreParsed(defaultStackParser);
 
-function hookGlobalEventProcessor() {
-  addGlobalEventProcessor((event) => {
-    if (event.exception?.values[0]) {
-      const moduleOptions = getTopModuleFromException(
-        defaultStackParser,
-        event.exception?.values[0]
-      );
+  const outputFrames = [];
 
-      if (moduleOptions) {
-        event.tags = {
-          ...event.tags,
-          ...moduleOptions.tags,
-        };
+  // Sentry frames have the top of the stack at the end of the array
+  for (const frame of event.exception.values[0].stacktrace.frames || []) {
+    const frameWithModuleData: StackFrameWithModuleData = frame;
+    frameWithModuleData.moduleData = window.__SMF_MODULES__[frame.filename];
+    outputFrames.push(frameWithModuleData);
+  }
 
-        event.release = moduleOptions.release || event.release;
-      }
-    }
-
-    return event;
-  });
-}
-
-export function getModuleFederationTransport(): (
-  options: BaseTransportOptions
-) => Transport {
-  hookGlobalEventProcessor();
-
-  return makeMultiplexedTransport(makeFetchTransport, ({ getEvent }) => {
-    const event = getEvent();
-    return event?.tags?.dsn && typeof event.tags.dsn === "string"
-      ? [event.tags.dsn]
-      : [];
-  });
+  return outputFrames;
 }

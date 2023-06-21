@@ -9,10 +9,6 @@ import {
 
 import React from "react";
 
-import { registerModule } from "sentry-module-federation";
-
-registerModule({ release: "app-02@1.0.0", tags: { dsn: "__DSN_2__" } });
-
 function DialogComponent() {
   const [open, setOpen] = React.useState(false);
 

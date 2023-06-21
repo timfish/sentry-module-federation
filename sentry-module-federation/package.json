@@ -4,11 +4,17 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
+    "start": "tsc -p tsconfig.json",
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "typescript": "^5.0.4",
     "@sentry/types": "^7.52.1",
-    "@sentry/browser": "^7.52.1"
+    "@sentry/browser": "^7.52.1",
+    "webpack": "^5.87.0"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./plugin": "./dist/plugin.js"
   }
 }

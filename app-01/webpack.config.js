@@ -1,7 +1,7 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin =
   require("webpack").container.ModuleFederationPlugin;
-const SentryCliPlugin = require("@sentry/webpack-plugin");
+const { SentryModuleDataPlugin } = require("sentry-module-federation/plugin");
 const deps = require("./package.json").dependencies;
 module.exports = {
   entry: "./src/index",
@@ -75,16 +75,8 @@ module.exports = {
         },
       },
     }),
-    new SentryCliPlugin({
-      include: ".",
-      ignoreFile: ".sentrycliignore",
-      ignore: ["node_modules", "webpack.config.js"],
-      configFile: "sentry.properties",
-      release: "app-01@1.0.0",
-      org: "sentry-sdks",
-      project: "sentry-electron",
-      authToken:
-        "76b9a52316c6443bb7d2b9c95a1b76c1828357a876184aa6835f1ff9e981c800",
+    new SentryModuleDataPlugin({
+      team: "team-host",
     }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
